@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
-import { Queue, Worker } from 'bullmq';
+import { Queue, QueueGetters, Worker } from 'bullmq';
 import Redis from 'ioredis';
 
 
@@ -15,7 +15,7 @@ const options = { connection };
 const queue = new Queue('test-queue', options);
 const worker = new Worker('test-queue', async (job) => {
     console.log("worker job ---------------");
-    console.log(job);
+    console.log(JSON.stringify(job.data, null, 2));
 }, options);
 
 // Log request to console
@@ -33,7 +33,7 @@ app.get('/', (req: Request, res: Response) => {
 app.post('/post', async (req: Request, res: Response) => {
     // Send a message to the queue
     await queue.add('test-job', { data: req.body });
-    res.sendFile('index.html', { root: __dirname });
+    res.redirect("/");
 });
 
 app.listen(8000, () => {
